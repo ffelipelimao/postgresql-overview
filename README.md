@@ -3,7 +3,9 @@
 ## Info
 - Criado em 1986
 - Crescendo em popularidade
+
 ![Logo](./images/ranking.jpg)
+
 - <b>psql</b> é a CLI para interagir com o SGBD
 - bom para saber os comandos pois ele tem auto complete
 
@@ -12,7 +14,9 @@
 - <b>Database</b>:  é o armazenamento onde o seu arquivo estará com tabelas e indicies
 - <b>User</b>: quem vai interagir e possui permissões
 - o PostgreSQL utiliza um arquitetura do tipo <b>Client-Server</b>  onde o cliente estabelece sua conexão com o servidor de banco de dados
+
 ![ClientServer](./images/clientserver.png)
+
 - Ele armazena suas conexões no server process para sua sessões para cada conexão, é possível ver isso com `show max_connections`
 - Postgres não vem com um pool de connections por default, você pode utilizar o <b>PgBouncer</b>
 A memória no PostgreSQL pode ser dividido em duas categorias, <b>Shared Memory</b> e <b>Local Memory</b>
