@@ -51,10 +51,15 @@ A memória no PostgreSQL pode ser dividido em duas categorias, <b>Shared Memory<
 ### Data Integrity
 
 - postgres podem ter tipos de dados comuns e dados especiais
-- Comuns
+
+- Comuns:
+
 ![comons](./images/common.png)
-- Especiais
+
+- Especiais:
+
 ![special](./images/special.png)
+
 - saber quais dados voce vai salvar é super importante tanto para saber a quantidade de dados que voce vai salvar, por exemplo 10GB por dia (pode ser ate requisito de System Design Interview)
 - quanto para evitar erros basicos de tipos
 - utilizar `NOT NULL` constraint para colocar dados obrigatorios
