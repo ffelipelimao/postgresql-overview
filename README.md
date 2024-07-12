@@ -1,4 +1,4 @@
-# PostgreSQL Advanced
+# PostgreSQL Beyond Basic
 
 - Esse documento é mais recomendado para quem quer saber um pouco mais sobre esse banco de dados passando por alguns topicos mais avançados, mas mantendo sempre facil para todos entender :D
 
@@ -68,5 +68,49 @@ A memória no PostgreSQL pode ser dividido em duas categorias, <b>Shared Memory<
 - <b>role</b> é um jeito de agrupar os usuarios, e poder ter priveleges para essa role por exemplo
 - é possivel dar permissões com o comando `GRANT`
 
-
 ## Query Optimization with Indexes
+
+### The path of a Query
+
+- Os passos para executar uma query são: <b>connection, parser, rewrite system, planner/optimizer e executor</b>
+
+![patg](./images/patg.png)
+
+- Dando um zoom in no <b>Query Optimizer</b>
+    - o postgres usa um cost base optimize que gera todos os tipos de planos de execução, por exemplo, um usa um index e outro não
+    - o proximo passo é estimar o quanto vai custar cada plano de execução, os custos são analisados por unidades abrirtarias, os custos são os recursos como CPU, MEM e IO. Principalmente IO que é a busca no disco que é muito custosa
+    - o proximo passo é utilizar o custo mais barato
+- Alguns outros bancos podem utilizar outros tipos de otimizadores, alguns exemplos: 
+
+![opt](./images/opt.png)
+
+- Agora dando um zoom in no <b>Exectution Plan</b>
+- Se queremos saber um plano de execução de uma query, podemos utilizar o comando `EXPLAIN` e ele retorna o QUERY PLAN, o caminho que a query ira fazer
+- Nesse exemplo podemos ver o retorno `Seq Scan on` onde o banco de dados diz vai fazer uma busca sequencia naquela tabela
+
+![scan](./images/scan.png)
+
+- Ja nesse outro exemplo podemos ver uma busca `Idenx Scan using sale_pkey` que é uma busca indexada direto na chave primaria
+
+![idx](./images/idx.png)
+
+- O banco de dados pode utilizar um sequencia scan caso o seu index for ineficiente
+- Utilizando `EXPLAIN (ANALYZE ON, TIMING ON)` para retornar o EXPLAIN e a QUERY e com isso ter dois tempos do optimizar e o tempo de execução da query
+
+
+### B-Tree Index
+
+- B-Tree funciona de uma modo onde tem uma arvore de poucas folhas onde os dados estão ordenados, ou seja, uma busca em um conjuto de dados ordenados. Por exemplo:
+
+![btree](./images/btree.png)
+
+- Criar indicies com `USING btree()` pode ajudam muito no tempo de execução da query
+- podemos ter tambem partial index que são geralmente de tamanho menores e podem ter tempo de execução menor tambem. Exemplo
+
+![pidx](./images/pidx.png)
+
+- Voce pode criar dados adicionais um folhas dentro desses indexes, criando indicies inclusivos com `UNIQUE INDEX` e `INCLUDE (id)`
+- isso pode fazer o banco buscar o dado somente no indicie, sem ir busca na tabela sem um `Index Only Scan` pois o dado ja vai estar la. Ele pode ter varias vantagens de deixar mais rapidos, mas pode deixar os indicies MUITO grande
+- Outro tipo de indicie é function based index, onde podemos ter resultado de função indexados, por exemplo `ON shorturl substring(url FROM '.+://([*/]+)')` nesse caso estamos indexando o resultado dessa substrings
+- e por ultimo temos o compiste index, que cria indicies de varios campos. Um ponto importante em indicies composto é que a ordem dos campos é importante,coloque a coluna que tem mais valores comuns primeiro e depois as colunas que tem menos valores depois
+- Campos `NULL` são indexados no Postgres por default
