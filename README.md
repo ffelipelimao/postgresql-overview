@@ -119,3 +119,41 @@ A memória no PostgreSQL pode ser dividido em duas categorias, <b>Shared Memory<
 - Outro tipo de indicie é function based index, onde podemos ter resultado de função indexados, por exemplo `ON shorturl substring(url FROM '.+://([*/]+)')` nesse caso estamos indexando o resultado dessa substrings
 - e por ultimo temos o compiste index, que cria indicies de varios campos. Um ponto importante em indicies composto é que a ordem dos campos é importante,coloque a coluna que tem mais valores comuns primeiro e depois as colunas que tem menos valores depois
 - Campos `NULL` são indexados no Postgres por default
+
+### Hash Index
+
+- A performance em banco de dados podemos ter isso balancenado nossos recursos de um jeito melhor
+- o tamanho das tabelas e do indicies podem estar diretamente relacionado com isso
+- para aplicar um index hash, vamos primeira gerar o hash de cada valor da nossa tabela podendo usar a função `hashchar(value)` e tendo algo semelhante a:
+
+![hashi](./images/hashi.png)
+
+- com isso é possivel agregar esses hash em buckets com `mod(n)` sendo n numero de buckets
+- e parar recuperar seria algo relacionado:
+
+![shash](./images/shash.png)
+
+- o tamanho do index usando hash index podem ser mais uteis tambem por não serem afetados pelo tamanho dos valores nas tabelas
+
+![hashsize](./images/hashsize.png)
+
+- hash index são otimos para valores que são quase identicos, pois ai eles ficam em buckets distintos, ai facilita para as buiscas
+
+### BRIN (Block Range Index) Index
+
+- O brin funcionado agrupando dados em range como no exemplo:
+
+![brain](./images/brain.png)
+
+- Para buscar o numero 5, ele so vai scan o block [4-6] e eliminando grande parte dos dados para a busca
+- o tamanho de brin index é bem menor que um index de b-tree
+- esse index é util so para quando os dados estão com grandes coesão
+- é possivel usar bloom filter para dados com grandes coesão
+
+### Indexes Maintence and Best Pratices
+
+- Um index nem sempre é o melhor caminho, se o SGDB ver que com o index ele vai ler uma grande porção de dados, ele vai utilizar um full scan
+- Index consome espaço em disco e pode deixar o tempo de `INSERT`, `DELETE` e `UPDATE` menor. Quanto mais index mais demorado essas operações podem ser
+- é possivel ver com `SELECT * FROM pg_stat_all_indexes WHERE indexrelname = 'seu_index'` o numero de query que estão utilizando seu indicie
+- quando uma linha é deletada ou dado um update, ela basicamente não é "permanentemente exlcuida", ela só é marcada para não ser mais utilizada e ficando como uma "linha morta"
+- por isso é muito comum usar `vacuum` para deixar essas linhas mortas prontas para receber novos dados, voce pode manualmente usar vacuum em uma tabela `VACUUM tabela_xpto` ou deixar um `autovacuum`
